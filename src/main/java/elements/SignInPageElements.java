@@ -11,4 +11,6 @@ public class SignInPageElements extends MainPageElements {
     private final By emailCreateUser = By.id("email_create");
     private final By submitCreateUserBtn = By.id("SubmitCreate");
     private final By errorMessage = By.xpath("//div[@id='create_account_error']/ol/li");
+    private final By errorAuthMessage = By.xpath("//div[@class='alert alert-danger']/ol/li");
+    private final By invalidEmailElement = By.xpath("//div[@class='form-group form-error']/input");
 }
