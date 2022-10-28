@@ -1,4 +1,4 @@
-import elements.SignInPageElements;
+import pages.MainPage;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
@@ -10,13 +10,13 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.junit.jupiter.api.TestMethodOrder;
 import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
 import org.openqa.selenium.chrome.ChromeDriver;
-import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import pages.MyAccountPage;
 
 import java.time.Duration;
 
+import static org.junit.jupiter.api.Assertions.assertAll;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
@@ -25,9 +25,10 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SignInTest {
     private WebDriver driver;
-    private WebDriverWait wait;
-    SignInPageElements signInPageElements;
-    WebElement signInBtn;
+
+    private MainPage mainPage;
+
+    private MyAccountPage myAccountPage;
     private static final String USER_EMAIL = "mekenya93@gmail.com";
     private static final String INCORRECT_EMAIL = "me@mail.com";
     private static final String INVALID_EMAIL = "measdd";
@@ -36,22 +37,22 @@ public class SignInTest {
     private static final String USER_NAME = "Kiryl Miakenia";
     private static final String INCORRECT_PASSWORD_MESSAGE = "Invalid password.";
     private static final String INCORRECT_LOGIN_MESSAGE = "Authentication failed.";
+    private static final String MY_ACCOUNT_PAGE_HEADER = "MY ACCOUNT";
+    private static final String PAGE_DESCRIPTION = "Welcome to your account. Here you can manage all of your personal information and orders.";
 
     @BeforeAll
     public void setup() {
         WebDriverManager.chromedriver().setup();
         driver = new ChromeDriver();
         driver.manage().window().maximize();
-        wait = new WebDriverWait(driver, Duration.ofSeconds(10));
-        signInPageElements = new SignInPageElements();
+        WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
+        mainPage = new MainPage(driver, wait);
         driver.get("http://automationpractice.com/index.php");
     }
 
     @BeforeEach
     public void refreshPage() {
         driver.manage().deleteAllCookies();
-        signInBtn = driver.findElement(signInPageElements.getSignInBtn());
-        signInBtn.click();
     }
 
     @AfterAll
@@ -63,16 +64,14 @@ public class SignInTest {
     @Test
     @Order(2)
     @DisplayName("Вход с неверным паролем")
-    public void incorrectPasswordsignInTest() {
-        WebElement emailInputField = driver.findElement(signInPageElements.getEmailInputField());
-        WebElement pswdInputField = driver.findElement(signInPageElements.getPasswordInputField());
-        WebElement submitSignInBtn = driver.findElement(signInPageElements.getSubmitButton());
-        emailInputField.click();
-        emailInputField.sendKeys(USER_EMAIL);
-        pswdInputField.click();
-        pswdInputField.sendKeys(INCORRECT_USER_PASSWORD);
-        submitSignInBtn.click();
-        assertEquals(INCORRECT_PASSWORD_MESSAGE, driver.findElement(signInPageElements.getErrorAuthMessage()).getText(),
+    public void incorrectPasswordSignInTest() {
+        String errorAuthMessage = mainPage.clickSignInButton()
+                                          .inputSignInEmail(USER_EMAIL)
+                                          .inputSignInPassword(INCORRECT_USER_PASSWORD)
+                                          .clickSubmitSignInButtonExpectedErrors()
+                                          .getErrorAuthMessage();
+
+        assertEquals(INCORRECT_PASSWORD_MESSAGE, errorAuthMessage,
                 "Отсутсвует сообщение о неправильном пароле");
     }
 
@@ -80,15 +79,13 @@ public class SignInTest {
     @Order(3)
     @DisplayName("Вход с неверным логином")
     public void incorrectLoginSignInTest() {
-        WebElement emailInputField = driver.findElement(signInPageElements.getEmailInputField());
-        WebElement pswdInputField = driver.findElement(signInPageElements.getPasswordInputField());
-        WebElement submitSignInBtn = driver.findElement(signInPageElements.getSubmitButton());
-        emailInputField.click();
-        emailInputField.sendKeys(INCORRECT_EMAIL);
-        pswdInputField.click();
-        pswdInputField.sendKeys(USER_PASSWORD);
-        submitSignInBtn.click();
-        assertEquals(INCORRECT_LOGIN_MESSAGE, driver.findElement(signInPageElements.getErrorAuthMessage()).getText(),
+        String errorAuthMessage = mainPage.clickSignInButton()
+                                          .inputSignInEmail(INCORRECT_EMAIL)
+                                          .inputSignInPassword(USER_PASSWORD)
+                                          .clickSubmitSignInButtonExpectedErrors()
+                                          .getErrorAuthMessage();
+
+        assertEquals(INCORRECT_LOGIN_MESSAGE, errorAuthMessage,
                 "Отсутсвует сообщение о неправильном логине");
     }
 
@@ -96,28 +93,29 @@ public class SignInTest {
     @Order(1)
     @DisplayName("Проверка валидации email")
     public void invalidEmailSignInTest() {
-        WebElement emailInputField = driver.findElement(signInPageElements.getEmailInputField());
-        WebElement pswdInputField = driver.findElement(signInPageElements.getPasswordInputField());
-        emailInputField.click();
-        emailInputField.sendKeys(INVALID_EMAIL);
-        pswdInputField.click();
-        WebElement invalidEmailElement = driver.findElement(signInPageElements.getInvalidEmailElement());
-        assertTrue(invalidEmailElement.isDisplayed(), "Отсутствует валидация email");
+        boolean invalidEmailInputIsDisplayed = mainPage.clickSignInButton()
+                                                       .inputSignInEmail(INVALID_EMAIL)
+                                                       .inputSignInPassword(USER_PASSWORD)
+                                                       .invalidEmailInputIsDisplayed();
+
+        assertTrue(invalidEmailInputIsDisplayed, "Отсутствует валидация email");
     }
 
     @Test
     @DisplayName("Успешный вход под существующим пользователем")
     public void signInTest() {
-        WebElement emailInputField = driver.findElement(signInPageElements.getEmailInputField());
-        WebElement pswdInputField = driver.findElement(signInPageElements.getPasswordInputField());
-        WebElement submitSignInBtn = driver.findElement(signInPageElements.getSubmitButton());
-        emailInputField.click();
-        emailInputField.sendKeys(USER_EMAIL);
-        pswdInputField.click();
-        pswdInputField.sendKeys(USER_PASSWORD);
-        submitSignInBtn.click();
-        wait.until(ExpectedConditions.visibilityOf(driver.findElement(signInPageElements.getAccHeader())));
-        WebElement accHeader = driver.findElement(signInPageElements.getAccHeader());
-        assertEquals(USER_NAME, accHeader.getText(), "Вход не выполнен или выполнен под другим пользователем");
+         myAccountPage = mainPage.clickSignInButton()
+                                           .inputSignInEmail(USER_EMAIL)
+                                           .inputSignInPassword(USER_PASSWORD)
+                                           .clickSubmitSignInButtonExpectedSuccess();
+
+         assertAll(
+                 () -> assertEquals(USER_NAME, myAccountPage.getAccountHeaderText(),
+                         "Вход не выполнен или выполнен под другим пользователем"),
+                 () -> assertEquals(MY_ACCOUNT_PAGE_HEADER, myAccountPage.getPageHeaderText(),
+                         "Страница с аккаунтом не открылась"),
+                 () -> assertEquals(PAGE_DESCRIPTION, myAccountPage.getPageDescription(),
+                         "Описание страницы некорректное")
+         );
     }
 }
