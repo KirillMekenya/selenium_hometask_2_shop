@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.extension.RegisterExtension;
 import pages.MainPage;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.AfterAll;
@@ -13,6 +14,7 @@ import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import pages.MyAccountPage;
 import pages.WishListsPage;
+import utils.AllureWatcher;
 
 import java.text.SimpleDateFormat;
 import java.time.Duration;
@@ -27,7 +29,7 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class WishListTest {
 
-    private WebDriver driver;
+    private final WebDriver driver = new ChromeDriver();
     private MyAccountPage myAccountPage;
     private WishListsPage  wishListsPage;
     private static final String USER_EMAIL = "mekenya93@gmail.com";
@@ -36,10 +38,12 @@ public class WishListTest {
     private static final String WISH = "Blouse";
     private static final String CURRENT_DATE = new SimpleDateFormat("yyyy-MM-dd").format(new Date());
 
+    @RegisterExtension
+    AllureWatcher watcher = new AllureWatcher(this.driver, "target/surefire-reports");
+
     @BeforeAll
     public void setup() {
         WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
         driver.manage().window().maximize();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         MainPage mainPage = new MainPage(driver, wait);

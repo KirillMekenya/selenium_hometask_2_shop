@@ -1,5 +1,6 @@
 package pages;
 
+import io.qameta.allure.Step;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -15,6 +16,7 @@ public class MyAccountPage extends BasePage{
         super(driver, wait);
     }
 
+    @Step("Получить текст названия страницы My account")
     public String getPageHeaderText() {
         wait.until(ExpectedConditions.visibilityOfElementLocated(pageHeader));
         return driver.findElement(pageHeader).getText();

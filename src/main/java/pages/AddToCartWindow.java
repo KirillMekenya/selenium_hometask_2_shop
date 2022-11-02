@@ -1,5 +1,6 @@
 package pages;
 
+import io.qameta.allure.Step;
 import lombok.Getter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -16,11 +17,13 @@ public class AddToCartWindow extends BasePage {
         super(driver, wait);
     }
 
+    @Step("Получить сообщение об успехе добавления в корзину")
     public String getAddToCartSuccessMessage () {
         wait.until(ExpectedConditions.visibilityOfElementLocated(addToCartSuccessHeader));
         return driver.findElement(addToCartSuccessHeader).getText();
     }
 
+    @Step("Нажать на кнопку Продолжить покупки")
     public SearchResultPage clickContinueShoppingButton() {
         driver.findElement(continueShoppingBtn).click();
         return new SearchResultPage(driver, wait);

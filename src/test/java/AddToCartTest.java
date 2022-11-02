@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.extension.RegisterExtension;
 import pages.AddToCartWindow;
 import pages.CartPage;
 import pages.MainPage;
@@ -13,6 +14,7 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
+import utils.AllureWatcher;
 
 import java.time.Duration;
 
@@ -23,7 +25,7 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class AddToCartTest {
 
-    private WebDriver driver;
+    private final WebDriver driver = new ChromeDriver();
 
     private MainPage mainPage;
     private AddToCartWindow addToCartWindow;
@@ -33,10 +35,12 @@ public class AddToCartTest {
     private static final String GOOD_NAME = "Blouse";
     private static final String TOTAL_CART_PRICE = "$29.00";
 
+    @RegisterExtension
+    AllureWatcher watcher = new AllureWatcher(this.driver, "target/surefire-reports");
+
     @BeforeAll
     public void setup() {
         WebDriverManager.chromedriver().setup();
-        driver = new ChromeDriver();
         driver.manage().window().maximize();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         mainPage = new MainPage(driver, wait);

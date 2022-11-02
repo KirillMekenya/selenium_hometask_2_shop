@@ -1,5 +1,6 @@
 package pages;
 
+import io.qameta.allure.Step;
 import lombok.Getter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -14,6 +15,7 @@ public class SearchResultPage extends BasePage {
         super(driver, wait);
     }
 
+    @Step("Нажать на иконку товара блузки")
     public DressDetailPage clickBlouseItem(){
         driver.findElement(blouseSearchResult).click();
         return new DressDetailPage(driver, wait);

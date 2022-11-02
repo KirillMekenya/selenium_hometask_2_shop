@@ -1,5 +1,6 @@
 package pages;
 
+import io.qameta.allure.Step;
 import lombok.Getter;
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
@@ -14,6 +15,7 @@ public class DressDetailPage extends BasePage{
         super(driver, wait);
     }
 
+    @Step("Нажать на кнопку Добавить в корзину")
     public AddToCartWindow cliclAddToCartButton(){
         driver.findElement(addToCartBtn).click();
         return new AddToCartWindow(driver, wait);

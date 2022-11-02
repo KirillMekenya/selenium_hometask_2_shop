@@ -1,3 +1,4 @@
+import org.junit.jupiter.api.extension.RegisterExtension;
 import pages.MainPage;
 import io.github.bonigarcia.wdm.WebDriverManager;
 import org.junit.jupiter.api.AfterAll;
@@ -13,6 +14,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import pages.MyAccountPage;
+import utils.AllureWatcher;
 
 import java.time.Duration;
 
@@ -24,7 +26,7 @@ import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 @TestInstance(PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
 public class SignInTest {
-    private WebDriver driver;
+    private WebDriver driver = new ChromeDriver();
 
     private MainPage mainPage;
 
@@ -39,6 +41,9 @@ public class SignInTest {
     private static final String INCORRECT_LOGIN_MESSAGE = "Authentication failed.";
     private static final String MY_ACCOUNT_PAGE_HEADER = "MY ACCOUNT";
     private static final String PAGE_DESCRIPTION = "Welcome to your account. Here you can manage all of your personal information and orders.";
+
+    @RegisterExtension
+    AllureWatcher watcher = new AllureWatcher(this.driver, "target/surefire-reports");
 
     @BeforeAll
     public void setup() {
