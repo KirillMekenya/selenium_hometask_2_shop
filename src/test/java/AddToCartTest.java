@@ -1,4 +1,10 @@
-import org.junit.jupiter.api.extension.RegisterExtension;
+import io.qameta.allure.Allure;
+import io.qameta.allure.Attachment;
+import lombok.Getter;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.openqa.selenium.OutputType;
+import org.openqa.selenium.TakesScreenshot;
+import org.openqa.selenium.logging.LogType;
 import pages.AddToCartWindow;
 import pages.CartPage;
 import pages.MainPage;
@@ -14,19 +20,20 @@ import org.junit.jupiter.api.TestMethodOrder;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.support.ui.WebDriverWait;
-import utils.AllureWatcher;
+import utils.ActionsOnFailureExtension;
 
 import java.time.Duration;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.TestInstance.Lifecycle.PER_CLASS;
 
+@Getter
 @TestInstance(PER_CLASS)
 @TestMethodOrder(MethodOrderer.OrderAnnotation.class)
+@ExtendWith(ActionsOnFailureExtension.class)
 public class AddToCartTest {
 
-    private final WebDriver driver = new ChromeDriver();
-
+    private WebDriver driver;
     private MainPage mainPage;
     private AddToCartWindow addToCartWindow;
     private CartPage cartPage;
@@ -35,12 +42,25 @@ public class AddToCartTest {
     private static final String GOOD_NAME = "Blouse";
     private static final String TOTAL_CART_PRICE = "$29.00";
 
-    @RegisterExtension
-    AllureWatcher watcher = new AllureWatcher(this.driver, "target/surefire-reports");
+    public void takeScreenshot() {
+        System.out.println("Taking screenshot.");
+        byte[] srcFile=((TakesScreenshot)driver).getScreenshotAs(OutputType.BYTES);
+        saveScreenshot(srcFile,  "Screenshot.png");
+    }
 
+    public void saveLogs() {
+        Allure.addAttachment("Console log: ", String.valueOf(driver.manage().logs().get(LogType.BROWSER).getAll()));
+    }
+
+    @Attachment(value = "{testName}", type = "image/png")
+    public byte[] saveScreenshot(byte[] screenShot, String testName) {
+        System.out.println("Attaching screenshot to Allure report");
+        return screenShot;
+    }
     @BeforeAll
     public void setup() {
         WebDriverManager.chromedriver().setup();
+        driver = new ChromeDriver();
         driver.manage().window().maximize();
         WebDriverWait wait = new WebDriverWait(driver, Duration.ofSeconds(10));
         mainPage = new MainPage(driver, wait);
